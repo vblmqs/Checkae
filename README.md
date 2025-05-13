@@ -15,7 +15,7 @@ Prof. Alexander Robert Kutzke
 
 # Projeto Final DS151 - 2025/1 
 
-Mais informações: 
+Mais informações: <https://tads-ufpr-alexkutzke.github.io/ds151-alexkutzke/13_projeto.html>
 
 Cada equipe deve fazer apenas 1 fork do projeto acima.
 
