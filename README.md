@@ -20,3 +20,7 @@ Mais informações: <https://tads-ufpr-alexkutzke.github.io/ds151-alexkutzke/13_
 Cada equipe deve fazer apenas 1 fork do projeto acima.
 
 Os membros da equipe devem ser adicionados pela interface do Gitlab como desenvolvedores no projeto. O arquivo README deverá conter o nome dos integrantes do grupo.
+
+## Integrantes do Grupo
+- Joyce Adriana Borecki
+- Victoria Isabele Corbolin Monte
