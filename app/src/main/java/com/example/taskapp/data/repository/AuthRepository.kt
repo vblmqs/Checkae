@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 
 class AuthRepository {
 
@@ -41,6 +42,27 @@ class AuthRepository {
                         is FirebaseAuthInvalidCredentialsException -> "E-mail inválido."
                         is FirebaseAuthUserCollisionException -> "Este e-mail já está cadastrado."
                         else -> e?.message ?: "Erro ao cadastrar usuário."
+                    }
+                    onError(message)
+                }
+            }
+    }
+
+    fun loginUser(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess()
+                } else {
+                    val message = when (val e = task.exception) {
+                        is FirebaseAuthInvalidUserException -> "Usuário não encontrado."
+                        is FirebaseAuthInvalidCredentialsException -> "E-mail ou senha inválidos."
+                        else -> e?.message ?: "Erro ao fazer login."
                     }
                     onError(message)
                 }

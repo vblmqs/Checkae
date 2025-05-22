@@ -24,11 +24,17 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
 
     val context = LocalContext.current
 
+    LaunchedEffect(viewModel.errorMessage) {
+        viewModel.errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     LaunchedEffect(viewModel.success) {
         if (viewModel.success) {
             Toast.makeText(context, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
             viewModel.success = false
-            // navController.navigate("login")
+            navController.navigate("login")
         }
     }
 
@@ -70,9 +76,6 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                     Button(
                         onClick = {
                             viewModel.registerUser()
-                            viewModel.errorMessage?.let {
-                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                            }
                         },
                         enabled = !viewModel.isLoading,
                         modifier = Modifier

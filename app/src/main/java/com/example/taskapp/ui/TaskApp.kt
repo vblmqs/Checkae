@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.taskapp.ui.login.LoginScreen
 import com.example.taskapp.ui.register.RegisterScreen
 
 @Composable
@@ -13,8 +14,11 @@ fun TaskApp() {
 
     NavHost(
         navController = navController,
-        startDestination = "register"
+        startDestination = "login"
     ) {
+        composable("login") {
+            LoginScreen(navController = navController)
+        }
         composable("register") {
             RegisterScreen(navController = navController)
         }
