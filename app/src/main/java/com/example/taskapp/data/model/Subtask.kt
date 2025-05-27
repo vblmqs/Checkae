@@ -1,11 +1,11 @@
-package com.example.taskapp.model
+package com.example.taskapp.data.model
 
 data class Subtask(
     val id: String = "",
     val titulo: String = "",
     val descricao: String? = null,
     val status: Status = Status.INICIADA,
-    val prazo: Date,
+    val prazo: Long?,
     val dataInicio: Long = System.currentTimeMillis(),
     val dataFim: Long? = null
 ) {
@@ -24,4 +24,5 @@ data class Subtask(
         val horas = millis / (1000 * 60 * 60)
         return String.format("%02d:%02d:%02d", horas, minutos, segundos)
     }
+
 }

@@ -1,5 +1,8 @@
 package com.example.taskapp.model
 
+import com.example.taskapp.data.model.Status
+import com.example.taskapp.data.model.Subtask
+
 data class Task(
     val id: String = "", // Gerado automaticamente pelo Firebase
     val titulo: String = "",
@@ -9,7 +12,7 @@ data class Task(
     val dataInicio: Long = System.currentTimeMillis(), // Em millis
     val dataFim: Long? = null, // Em millis
     val prazoManual: Long = System.currentTimeMillis() + 86400000L, // 1 dia depois por padrão
-    val subtarefas: List<Subtarefa> = emptyList()
+    val subtarefas: List<Subtask> = emptyList()
 ) {
     // Duração formatada (hh:mm:ss)
     val duracao: String
@@ -33,4 +36,5 @@ data class Task(
         val horas = millis / (1000 * 60 * 60)
         return String.format("%02d:%02d:%02d", horas, minutos, segundos)
     }
+
 }

@@ -4,12 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.taskapp.ui.tasklist.TaskListScreen
-import com.example.taskapp.ui.taskform.TaskFormScreen
+import androidx.navigation.navArgument
 import com.example.taskapp.ui.subtaskform.SubtaskFormScreen
+import com.example.taskapp.ui.tasklist.TaskListScreen
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,23 +26,18 @@ class MainActivity : ComponentActivity() {
                         TaskListScreen(navController)
                     }
 
-                    composable("CadastrarTarefa") {
-                        TaskFormScreen()
-                    }
-
-                    composable("CadastrarSubtarefa/{taskId}") { backStackEntry ->
-                        val taskId = backStackEntry.arguments?.getString("taskId")
-                        SubtaskFormScreen(taskId = taskId)
-                    }
-
-                    composable("EditarTarefa/{taskId}") { backStackEntry ->
-                        val taskId = backStackEntry.arguments?.getString("taskId")
-                        TaskFormScreen(taskId = taskId)
-                    }
-
-                    composable("EditarSubtarefa/{taskId}") { backStackEntry ->
-                        val taskId = backStackEntry.arguments?.getString("taskId")
-                        SubtaskFormScreen(taskId = taskId)
+                    // Usando SubtaskFormScreen para criar nova subtarefa: só passa tarefaId
+                    composable(
+                        "subtaskForm/new/{tarefaId}",
+                        arguments = listOf(navArgument("tarefaId") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val tarefaId = backStackEntry.arguments?.getString("tarefaId") ?: ""
+                        SubtaskFormScreen(
+                            navController = navController,
+                            tarefaId = tarefaId,
+                            subtarefaId = null,
+                            onBack = { navController.popBackStack() }
+                        )
                     }
                 }
             }
@@ -47,20 +45,3 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-/*
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TaskappTheme {
-        Greeting("Android")
-    }
-} */
