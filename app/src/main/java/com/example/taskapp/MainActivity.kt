@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.taskapp.ui.subtaskform.SubtaskFormScreen
 import com.example.taskapp.ui.tasklist.TaskListScreen
+import com.example.taskapp.ui.taskform.TaskFormScreen
 
 
 
@@ -37,6 +38,13 @@ class MainActivity : ComponentActivity() {
                             tarefaId = tarefaId,
                             subtarefaId = null,
                             onBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable("CadastrarTarefa") {
+                        TaskFormScreen(
+                            navController = navController
+                            //fazer tarefaId, etc
                         )
                     }
                 }
