@@ -1,29 +1,36 @@
-package com.example.taskapp.ui.login
+package com.example.taskapp.ui.register
 
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import com.example.taskapp.data.repository.AuthRepository
 import android.util.Patterns
 
-class AuthViewModel(
+class RegisterViewModel(
     private val repository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
+    var name by mutableStateOf("")
     var email by mutableStateOf("")
     var password by mutableStateOf("")
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
     var success by mutableStateOf(false)
 
-    fun loginUser() {
+    fun registerUser() {
         errorMessage = null
         success = false
 
+        val cleanName = name.trim()
         val cleanEmail = email.trim()
         val cleanPassword = password.trim()
 
-        if (cleanEmail.isEmpty() || cleanPassword.isEmpty()) {
+        if (cleanName.isEmpty() || cleanEmail.isEmpty() || cleanPassword.isEmpty()) {
             errorMessage = "Preencha todos os campos."
+            return
+        }
+
+        if (!cleanName.matches(Regex("^[A-Za-zÀ-ÿ\\s]+\$"))) {
+            errorMessage = "O nome deve conter apenas letras."
             return
         }
 
@@ -33,13 +40,14 @@ class AuthViewModel(
         }
 
         if (cleanPassword.length < 6) {
-            errorMessage = "Senha muito curta."
+            errorMessage = "A senha deve ter pelo menos 6 caracteres."
             return
         }
 
         isLoading = true
 
-        repository.loginUser(
+        repository.registerUser(
+            name = cleanName,
             email = cleanEmail,
             password = cleanPassword,
             onSuccess = {
