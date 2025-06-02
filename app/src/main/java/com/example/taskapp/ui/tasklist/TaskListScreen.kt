@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Row as Row1
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.ui.unit.sp
 import com.example.taskapp.model.Priority
 import com.example.taskapp.model.Task
 import com.example.taskapp.ui.subtaskform.SubtaskFormViewModel
@@ -35,6 +36,7 @@ fun TaskListScreen(navController: NavHostController) {
     val tarefas by viewModel.tasks.collectAsState()
     var tarefaExpandidaId by remember { mutableStateOf<String?>(null) }
     val subtaskFormViewModel: SubtaskFormViewModel = viewModel()
+    var mostrarModalLogout by remember { mutableStateOf(false) }
 
     var filtroAberto by remember { mutableStateOf(false) }
     var busca by remember { mutableStateOf("") }
@@ -91,7 +93,7 @@ fun TaskListScreen(navController: NavHostController) {
         ) {
             Text("Minhas tarefas", style = MaterialTheme.typography.headlineSmall)
             IconButton(onClick = {
-                // Abrir modal de logout aqui
+                mostrarModalLogout = true
             }) {
                 Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
             }
@@ -246,6 +248,36 @@ fun TaskListScreen(navController: NavHostController) {
             ) {
                 Text("Nova tarefa")
             }
+        }
+
+        if (mostrarModalLogout) {
+            AlertDialog(
+                onDismissRequest = { mostrarModalLogout = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        mostrarModalLogout = false
+                        // navController.navigate("login")
+                    }) {
+                        Text("Sim", color = Color(0xFF2E7D32))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { mostrarModalLogout = false }) {
+                        Text("Não", color = Color(0xFF2E7D32))
+                    }
+                },
+                text = {
+                    Text(
+                        "Tem certeza que deseja sair?",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 16.sp,
+                            color = Color.DarkGray
+                        )
+                    )
+                },
+                containerColor = Color(0xFFF0FFF1),
+                shape = RoundedCornerShape(16.dp)
+            )
         }
     }
 }
