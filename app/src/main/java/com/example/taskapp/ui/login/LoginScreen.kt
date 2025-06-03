@@ -35,7 +35,9 @@ fun LoginScreen(
         if (viewModel.success) {
             Toast.makeText(context, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show()
             viewModel.success = false
-            // home?
+            navController.navigate("ListaTarefas") {
+                popUpTo("login") { inclusive = true }
+            }
         }
     }
 
