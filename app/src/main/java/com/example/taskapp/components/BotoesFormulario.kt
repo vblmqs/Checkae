@@ -2,7 +2,6 @@ package com.example.taskapp.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.res.painterResource
 import com.example.taskapp.R
 import androidx.compose.material3.*
@@ -12,62 +11,66 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun BotoesFormulario(
-    onDelete: () -> Unit,
     onConfirm: () -> Unit,
+    onDelete: (() -> Unit)?, // MODIFICAÇÃO 1: onDelete agora é opcional (nullable)
     modifier: Modifier = Modifier
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = if (onDelete != null) Arrangement.spacedBy(12.dp) else Arrangement.End, // Ajusta o arranjo
         modifier = modifier.fillMaxWidth()
     ) {
-        OutlinedButton(
-            onClick = onDelete,
-            modifier = Modifier
-                .weight(1f)
-                .height(48.dp),
-            shape = RoundedCornerShape(8.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            border = BorderStroke(1.dp, Color.Transparent),
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = Color(0xFFF5D9DA),
-                contentColor = Color.Black.copy(alpha = 0.63f)
-            )
-        ) {
-            Text(
-                text = "Excluir tarefa",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 20.sp,
-                    color = Color.Black.copy(alpha = 0.63f)
+        // MODIFICAÇÃO 2: Mostrar o botão Excluir somente se onDelete não for null
+        onDelete?.let { deleteAction ->
+            OutlinedButton(
+                onClick = deleteAction, // Usa a ação de deletar fornecida
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                border = BorderStroke(1.dp, Color.Transparent),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color(0xFFF5D9DA),
+                    contentColor = Color.Black.copy(alpha = 0.63f)
                 )
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Icon(
-                painter = painterResource(id = R.drawable.ic_trash),
-                contentDescription = "Excluir",
-                modifier = Modifier.size(18.dp),
-                tint = Color.Unspecified
-            )
+            ) {
+                Text(
+                    text = "Excluir", // Ou deleteButtonText
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        lineHeight = 20.sp,
+                        color = Color.Black.copy(alpha = 0.63f)
+                    )
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_trash), // Certifique-se que este ícone existe
+                    contentDescription = "Excluir",
+                    modifier = Modifier.size(18.dp),
+                    tint = Color.Unspecified
+                )
+            }
         }
 
         Button(
             onClick = onConfirm,
             modifier = Modifier
-                .weight(1f)
+                .weight(1f) // Se onDelete for null, este botão pegará mais espaço ou todo o espaço
                 .height(48.dp),
             shape = RoundedCornerShape(8.dp),
             contentPadding = PaddingValues(horizontal = 24.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFB6F2C2),
+                containerColor = Color(0xFFB6F2C2), // Verde claro para confirmar
                 contentColor = Color.Black
             )
         ) {
             Text(
-                text = "Confirmar",
+                text = "Confirmar", // Ou confirmButtonText
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
