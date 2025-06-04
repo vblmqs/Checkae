@@ -22,7 +22,7 @@ fun Header(
     onVoltar: () -> Unit,
     onClickIconeDireita: (() -> Unit)? = null
 ) {
-    var iconeAtivo by remember { mutableStateOf(false) }
+    var iconeAtivo by remember { mutableStateOf(false) } // Estado para alternar o ícone de notificação
 
     Box(
         modifier = Modifier
@@ -34,6 +34,7 @@ fun Header(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Botão Voltar (sempre presente)
             IconButton(onClick = onVoltar) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_left),
@@ -41,20 +42,25 @@ fun Header(
                 )
             }
 
-            IconButton(
-                onClick = {
-                    iconeAtivo = !iconeAtivo
-                    onClickIconeDireita?.invoke()
+            // ---- ÍCONE DE NOTIFICAÇÕES CONDICIONAL ----
+            // Só mostra o IconButton se onClickIconeDireita não for null
+            onClickIconeDireita?.let { acaoIconeDireita ->
+                IconButton(
+                    onClick = {
+                        iconeAtivo = !iconeAtivo // Alterna o estado local do ícone
+                        acaoIconeDireita.invoke() // Chama a ação passada
+                    }
+                ) {
+                    Icon(
+                        imageVector = if (iconeAtivo) Icons.Filled.Notifications else Icons.Outlined.Notifications,
+                        contentDescription = "Notificações",
+                        tint = if (iconeAtivo) Color(0xFF37643A) else Color.Black
+                    )
                 }
-            ) {
-                Icon(
-                    imageVector = if (iconeAtivo) Icons.Filled.Notifications else Icons.Outlined.Notifications,
-                    contentDescription = "Notificações",
-                    tint = if (iconeAtivo) Color(0xFF37643A) else Color.Black
-                )
             }
         }
 
+        // Texto do Título (centralizado no Box)
         Text(
             text = titulo,
             modifier = Modifier.align(Alignment.Center),
