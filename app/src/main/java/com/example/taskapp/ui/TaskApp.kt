@@ -37,17 +37,41 @@ fun TaskApp() {
             TaskFormScreen(navController = navController)
         }
 
+        // NOVA SUBTAREFA
         composable(
-            "subtaskForm/new/{tarefaId}",
+            route = "subtaskForm/new/{tarefaId}",
             arguments = listOf(navArgument("tarefaId") { type = NavType.StringType })
         ) { backStackEntry ->
             val tarefaId = backStackEntry.arguments?.getString("tarefaId") ?: ""
             SubtaskFormScreen(
                 navController = navController,
                 tarefaId = tarefaId,
-                subtarefaId = null,
-                onBack = { navController.popBackStack() }
+                subtarefaId = null // null indica modo de criação
             )
+        }
+
+        // EDITAR SUBTAREFA
+        composable(
+            route = "subtaskForm/edit/{tarefaId}/{subtarefaId}", // Nova rota com ambos os IDs
+            arguments = listOf(
+                navArgument("tarefaId") { type = NavType.StringType },
+                navArgument("subtarefaId") { type = NavType.StringType } // subTarefaId também é String
+            )
+        ) { backStackEntry ->
+            val tarefaId = backStackEntry.arguments?.getString("tarefaId") ?: ""
+            val subtarefaId =
+                backStackEntry.arguments?.getString("subtarefaId") // Será não-nulo se a rota for chamada corretamente
+
+            // Verifica se subtarefaId realmente veio (para segurança, embora a rota o exija)
+            if (subtarefaId != null && tarefaId.isNotEmpty()) {
+                SubtaskFormScreen(
+                    navController = navController,
+                    tarefaId = tarefaId,
+                    subtarefaId = subtarefaId // Passa o ID da subtarefa, indicando modo de edição
+                )
+            } else {
+                navController.popBackStack()
+            }
         }
     }
 }
