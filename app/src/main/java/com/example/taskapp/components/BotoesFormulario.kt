@@ -16,14 +16,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 @Composable
 fun BotoesFormulario(
     onConfirm: () -> Unit,
-    onDelete: (() -> Unit)?, // MODIFICAÇÃO 1: onDelete agora é opcional (nullable)
+    onDelete: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     Row(
         horizontalArrangement = if (onDelete != null) Arrangement.spacedBy(12.dp) else Arrangement.End, // Ajusta o arranjo
         modifier = modifier.fillMaxWidth()
     ) {
-        // MODIFICAÇÃO 2: Mostrar o botão Excluir somente se onDelete não for null
         onDelete?.let { deleteAction ->
             OutlinedButton(
                 onClick = deleteAction, // Usa a ação de deletar fornecida
@@ -65,7 +64,7 @@ fun BotoesFormulario(
             shape = RoundedCornerShape(8.dp),
             contentPadding = PaddingValues(horizontal = 24.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFB6F2C2), // Verde claro para confirmar
+                containerColor = Color(0xFF90DC91), // Verde claro para confirmar
                 contentColor = Color.Black
             )
         ) {

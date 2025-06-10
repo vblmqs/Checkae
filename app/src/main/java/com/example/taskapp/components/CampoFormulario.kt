@@ -23,12 +23,13 @@ fun CampoFormulario(
 ) {
     Box(
         modifier = modifier
-            .width(360.dp)
-            .background(Color(0xFFE1F1E2), shape = RoundedCornerShape(8.dp))
-            .padding(start = 16.dp, end = 9.dp, top = 16.dp, bottom = 16.dp)
+            .fillMaxWidth() // Ocupa a largura total disponível
+            .background(Color(0xE9CFE5D0), shape = RoundedCornerShape(8.dp))
+            .padding(horizontal = 16.dp, vertical = 16.dp) // padding interno do Box
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
+            // Para controlar o espaçamento entre o label e o campo de texto
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
@@ -40,8 +41,7 @@ fun CampoFormulario(
                     lineHeight = 20.sp
                 ),
                 modifier = Modifier
-                    .width(90.dp)
-                    .padding(end = 12.dp)
+                    .weight(0.3f) // Ocupa 30% do espaço disponível na linha
             )
 
             BasicTextField(
@@ -55,8 +55,7 @@ fun CampoFormulario(
                     fontFamily = MaterialTheme.typography.bodyMedium.fontFamily
                 ),
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 7.dp)
+                    .weight(0.7f) // Ocupa 70% do espaço restante
             )
         }
     }

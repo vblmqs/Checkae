@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -21,33 +22,34 @@ fun CampoData(
     modifier: Modifier = Modifier
 ) {
     Box(
+
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.Transparent)
-            .padding(start = 16.dp, end = 9.dp, top = 16.dp, bottom = 16.dp)
+            .background(Color(0xE9CFE5D0), shape = RoundedCornerShape(8.dp))
+            .padding(horizontal = 16.dp, vertical = 16.dp) // Padding consistente: 16.dp de cada lado
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = label.uppercase(),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontSize = 12.sp,
-                    fontWeight = MaterialTheme.typography.labelSmall.fontWeight,
+                    fontWeight = FontWeight.Medium, // Usando FontWeight.Medium para consistência
                     lineHeight = 20.sp,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground // Use a cor do tema para melhor adaptabilidade
                 ),
-                modifier = Modifier.width(90.dp)
+                modifier = Modifier.weight(0.3f) // Ocupa 30% do espaço da Row
             )
-
-            Spacer(modifier = Modifier.weight(1f))
 
             Box(
                 modifier = Modifier
-                    .background(Color(0xFFC9F2CD), shape = RoundedCornerShape(8.dp))
+                    .weight(0.7f) // Ocupa 70% do espaço restante na Row
                     .clickable { onClick() }
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                contentAlignment = Alignment.CenterEnd // Alinha o conteúdo do Box (o Text) à direita
             ) {
                 Text(
                     text = value,

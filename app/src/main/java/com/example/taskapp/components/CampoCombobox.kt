@@ -1,6 +1,7 @@
 package com.example.taskapp.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -18,64 +19,64 @@ import androidx.compose.ui.unit.sp
 fun <T> CampoCombobox(
     label: String,
     options: List<T>,
-    selectedOption: T?, // Opção selecionada, pode ser nula se nada estiver selecionado inicialmente
+    selectedOption: T?,
     onOptionSelected: (T) -> Unit,
-    optionToDisplayedString: (T) -> String = { it.toString() }, // Como converter a opção para String para exibição
-    placeholder: String = "Selecione...", // Texto para mostrar se selectedOption for nulo
+    optionToDisplayedString: (T) -> String = { it.toString() },
+    placeholder: String = "Selecione...",
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(
+        // Removido o width(360.dp) fixo e usado fillMaxWidth()
+        // As margens laterais agora são controladas pelo padding horizontal
         modifier = modifier
-            .width(360.dp) // Largura igual ao CampoFormulario
-            .background(Color(0xFFE1F1E2), shape = RoundedCornerShape(8.dp))
-            // Padding igual ao CampoFormulario para consistência visual externa
-            .padding(start = 16.dp, end = 9.dp, top = 16.dp, bottom = 16.dp)
+            .fillMaxWidth() // Ocupa a largura total disponível
+            .background(Color(0xE9CFE5D0), shape = RoundedCornerShape(8.dp))
+            .padding(horizontal = 16.dp, vertical = 16.dp) // Padding interno consistente
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically // Alinha o label e o campo do dropdown
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = label.uppercase(), // Label em maiúsculas, como no CampoFormulario
+                text = label.uppercase(),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = Color.Black,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     lineHeight = 20.sp
                 ),
-                modifier = Modifier.width(90.dp) // Largura do label igual ao CampoFormulario
+                modifier = Modifier.weight(0.3f)
             )
 
             ExposedDropdownMenuBox(
-                expanded = expanded && enabled, // O menu só expande se o campo estiver habilitado
+                expanded = expanded && enabled,
                 onExpandedChange = { if (enabled) expanded = !expanded },
-                modifier = Modifier.weight(1f) // Faz o dropdown ocupar o espaço restante
+                modifier = Modifier.weight(0.7f)
             ) {
-                // TextField que exibe a opção selecionada e serve como âncora para o menu
                 TextField(
                     value = selectedOption?.let { optionToDisplayedString(it) } ?: placeholder,
                     onValueChange = { /* Campo é somente leitura */ },
                     readOnly = true,
                     enabled = enabled,
-                    textStyle = TextStyle( // Estilo do texto similar ao BasicTextField do CampoFormulario
+                    textStyle = TextStyle(
                         color = if (selectedOption != null && enabled) Color.Black.copy(alpha = 0.7f)
-                        else if (enabled) Color.Black.copy(alpha = 0.4f) // Cor do placeholder
-                        else Color.Black.copy(alpha = 0.3f), // Cor quando desabilitado
+                        else if (enabled) Color.Black.copy(alpha = 0.4f)
+                        else Color.Black.copy(alpha = 0.3f),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
-                        lineHeight = 19.6.sp, // Igual ao BasicTextField
+                        lineHeight = 19.6.sp,
                         fontFamily = MaterialTheme.typography.bodyMedium.fontFamily
                     ),
                     trailingIcon = {
-                        if (enabled) { // Só mostra o ícone se estiver habilitado
+                        if (enabled) {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                         }
                     },
-                    colors = TextFieldDefaults.colors( // Remove o fundo e bordas do TextField
+                    colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         disabledContainerColor = Color.Transparent,
@@ -86,11 +87,10 @@ fun <T> CampoCombobox(
                         errorIndicatorColor = Color.Transparent
                     ),
                     modifier = Modifier
-                        .menuAnchor() // Necessário para o ExposedDropdownMenuBox
+                        .menuAnchor()
                         .fillMaxWidth()
                 )
 
-                // O menu dropdown que aparece
                 ExposedDropdownMenu(
                     expanded = expanded && enabled,
                     onDismissRequest = { expanded = false }
