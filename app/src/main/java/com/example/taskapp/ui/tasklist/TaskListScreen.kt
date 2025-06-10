@@ -7,9 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.FilterAlt  // Corrigido aqui
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,45 +15,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.taskapp.data.model.Status
-import androidx.compose.foundation.layout.Row as Row1
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.example.taskapp.data.model.Status
 import com.example.taskapp.model.Priority
 import com.example.taskapp.model.Task
 import com.example.taskapp.ui.subtaskform.SubtaskFormViewModel
-
+import com.example.taskapp.ui.theme.ThemeViewModel
 
 @Composable
-fun TaskListScreen(navController: NavHostController) {
+fun TaskListScreen(navController: NavHostController, themeViewModel: ThemeViewModel) {
     val viewModel: TaskViewModel = viewModel()
     val tarefas by viewModel.tasks.collectAsState()
     var tarefaExpandidaId by remember { mutableStateOf<String?>(null) }
     val subtaskFormViewModel: SubtaskFormViewModel = viewModel()
     var mostrarModalLogout by remember { mutableStateOf(false) }
-
     var filtroAberto by remember { mutableStateOf(false) }
     var busca by remember { mutableStateOf("") }
-
-    // Estado para filtro ativo: pode ser "Nenhum", "Status" ou "Prioridade"
     var filtroAtivo by remember { mutableStateOf("Nenhum") }
 
-    // Função para aplicar filtro na lista de tarefas
+    val isDarkTheme = themeViewModel.isDarkTheme.collectAsState().value
+
     fun filtrarTarefas(tarefas: List<Task>): List<Task> {
-        // Primeiro filtra pela busca no título
         var listaFiltrada = tarefas.filter {
             it.titulo.contains(busca, ignoreCase = true)
         }
 
-        // Aplica filtro ativo
         listaFiltrada = when (filtroAtivo) {
             "Status" -> {
                 listaFiltrada.sortedWith(compareBy { tarefa ->
-                    // Pega o "status mais baixo" da tarefa, onde INICIADA < PAUSADA < CONCLUIDA
                     tarefa.subtarefas.minOfOrNull { subtarefa ->
                         when (subtarefa.status) {
                             Status.INICIADA -> 0
@@ -66,8 +55,8 @@ fun TaskListScreen(navController: NavHostController) {
                 })
             }
             "Prioridade" -> {
-                listaFiltrada.sortedWith(compareBy { tarefa ->
-                    when(tarefa.prioridade) {
+                listaFiltrada.sortedWith(compareBy {
+                    when (it.prioridade) {
                         Priority.ALTA -> 0
                         Priority.MEDIA -> 1
                         Priority.BAIXA -> 2
@@ -84,38 +73,47 @@ fun TaskListScreen(navController: NavHostController) {
 
     Column(modifier = Modifier
         .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)
         .padding(16.dp)) {
 
-        // Cabeçalho com título e botão de logout
-        Row1(
+        // Cabeçalho com título e botões
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Minhas tarefas", style = MaterialTheme.typography.headlineSmall)
-            IconButton(onClick = {
-                mostrarModalLogout = true
-            }) {
-                Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
+            Text("Minhas tarefas", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onBackground)
+            Row {
+                IconButton(onClick = { themeViewModel.toggleTheme() }) {
+                    Icon(
+                        imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                        contentDescription = "Alternar Tema",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                IconButton(onClick = { mostrarModalLogout = true }) {
+                    Icon(Icons.Default.ExitToApp, contentDescription = "Logout", tint = MaterialTheme.colorScheme.onBackground)
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Campo de busca + filtro
-        Row1(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = busca,
                 onValueChange = { busca = it },
-                placeholder = { Text("Buscar tarefa", color = Color.Gray) },
+                placeholder = { Text("Buscar tarefa", color = MaterialTheme.colorScheme.onBackground) },
                 modifier = Modifier.weight(1f),
                 leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.Gray)
+                    Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onSurface)
                 }
             )
             Spacer(modifier = Modifier.width(8.dp))
             Box {
                 IconButton(onClick = { filtroAberto = !filtroAberto }) {
-                    Icon(Icons.Default.FilterAlt, contentDescription = "Filtro")
+                    Icon(Icons.Default.FilterAlt, contentDescription = "Filtro", tint = MaterialTheme.colorScheme.onBackground)
                 }
                 DropdownMenu(
                     expanded = filtroAberto,
@@ -177,8 +175,7 @@ fun TaskListScreen(navController: NavHostController) {
                         tarefa.subtarefas
                             .sortedBy { it.prazo ?: Long.MAX_VALUE }
                             .forEach { subtarefa ->
-
-                                Row1(
+                                Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.padding(vertical = 4.dp)
                                 ) {
@@ -191,19 +188,19 @@ fun TaskListScreen(navController: NavHostController) {
                                                 subtarefaId = subtarefa.id,
                                                 novoStatus = novoStatus
                                             )
-
                                         },
                                         colors = CheckboxDefaults.colors(
-                                            checkedColor = MaterialTheme.colorScheme.primary,   // cor quando marcado
-                                            uncheckedColor = MaterialTheme.colorScheme.onSurface // cor quando desmarcado
+                                            checkedColor = MaterialTheme.colorScheme.primary,
+                                            uncheckedColor = MaterialTheme.colorScheme.onSurface
                                         )
                                     )
 
-                                    Column(modifier = Modifier
-                                        .clickable {
-                                            navController.navigate("editarSubtarefa/${subtarefa.id}")
-                                        }
-                                        .padding(start = 8.dp)
+                                    Column(
+                                        modifier = Modifier
+                                            .clickable {
+                                                navController.navigate("editarSubtarefa/${subtarefa.id}")
+                                            }
+                                            .padding(start = 8.dp)
                                     ) {
                                         Text(subtarefa.titulo, fontWeight = FontWeight.Medium)
                                         Text("Status: ${subtarefa.status.name}")
@@ -212,7 +209,7 @@ fun TaskListScreen(navController: NavHostController) {
                                 }
                             }
 
-                        Row1(
+                        Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.padding(top = 8.dp)
                         ) {
@@ -224,7 +221,7 @@ fun TaskListScreen(navController: NavHostController) {
                             }
                             Button(
                                 onClick = {
-                                    navController.navigate("subtaskForm/new/{tarefaId}")
+                                    navController.navigate("subtaskForm/new/${tarefa.id}")
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
                             ) {
@@ -281,3 +278,4 @@ fun TaskListScreen(navController: NavHostController) {
         }
     }
 }
+

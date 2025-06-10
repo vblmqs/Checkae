@@ -41,7 +41,7 @@ fun LoginScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxSize() .background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
             Box(
@@ -114,13 +114,13 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Não possui conta?",
-                    color = Color(0xFF3F3F3F).copy(alpha = 0.77f),
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 13.sp
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Registre-se.",
-                    color = Color(0xFF3C4F96).copy(alpha = 0.77f),
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 13.sp,
                     modifier = Modifier.clickable {
                         navController.navigate("register")

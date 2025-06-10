@@ -35,7 +35,8 @@ fun CampoData(
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontSize = 12.sp,
                     fontWeight = MaterialTheme.typography.labelSmall.fontWeight,
-                    lineHeight = 20.sp
+                    lineHeight = 20.sp,
+                    color = MaterialTheme.colorScheme.onBackground
                 ),
                 modifier = Modifier.width(90.dp)
             )

@@ -2,6 +2,7 @@ package com.example.taskapp.ui.taskform
 
 import android.app.DatePickerDialog
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,7 +57,8 @@ fun TaskFormScreen(navController: NavHostController) {
         }.show()
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+    {
         Column(
             modifier = Modifier
                 .fillMaxSize()

@@ -1,6 +1,7 @@
 package com.example.taskapp.ui.subtaskform
 
 import android.app.DatePickerDialog
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.* // Necessário para ExperimentalMaterial3Api se CampoCombobox usar TextField
 import androidx.compose.runtime.*
@@ -88,7 +89,7 @@ fun SubtaskFormScreen(
         ).show()
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize() .background(MaterialTheme.colorScheme.background)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

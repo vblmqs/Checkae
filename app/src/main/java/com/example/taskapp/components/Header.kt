@@ -3,6 +3,7 @@ package com.example.taskapp.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
@@ -36,9 +37,10 @@ fun Header(
         ) {
             // Botão Voltar (sempre presente)
             IconButton(onClick = onVoltar) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_left),
-                    contentDescription = "Voltar"
+                Icon(
+                    imageVector = Icons.Default.ChevronLeft,
+                    contentDescription = "Voltar",
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -54,7 +56,10 @@ fun Header(
                     Icon(
                         imageVector = if (iconeAtivo) Icons.Filled.Notifications else Icons.Outlined.Notifications,
                         contentDescription = "Notificações",
-                        tint = if (iconeAtivo) Color(0xFF37643A) else Color.Black
+                        tint = if (iconeAtivo)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
@@ -65,7 +70,7 @@ fun Header(
             text = titulo,
             modifier = Modifier.align(Alignment.Center),
             style = MaterialTheme.typography.titleMedium.copy(
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 lineHeight = 22.4.sp,

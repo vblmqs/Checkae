@@ -12,9 +12,10 @@ import com.example.taskapp.ui.register.RegisterScreen
 import com.example.taskapp.ui.subtaskform.SubtaskFormScreen
 import com.example.taskapp.ui.taskform.TaskFormScreen
 import com.example.taskapp.ui.tasklist.TaskListScreen
+import com.example.taskapp.ui.theme.ThemeViewModel
 
 @Composable
-fun TaskApp() {
+fun TaskApp(themeViewModel: ThemeViewModel) {
     val navController: NavHostController = rememberNavController()
 
     NavHost(
@@ -30,7 +31,7 @@ fun TaskApp() {
         }
 
         composable("ListaTarefas") {
-            TaskListScreen(navController)
+            TaskListScreen(navController, themeViewModel)
         }
 
         composable("CadastrarTarefa") {
