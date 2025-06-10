@@ -23,6 +23,7 @@ import com.example.taskapp.model.Priority
 import com.example.taskapp.model.Task
 import com.example.taskapp.ui.subtaskform.SubtaskFormViewModel
 import com.example.taskapp.ui.theme.ThemeViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun TaskListScreen(navController: NavHostController, themeViewModel: ThemeViewModel) {
@@ -252,8 +253,11 @@ fun TaskListScreen(navController: NavHostController, themeViewModel: ThemeViewMo
                 onDismissRequest = { mostrarModalLogout = false },
                 confirmButton = {
                     TextButton(onClick = {
+                        FirebaseAuth.getInstance().signOut()
                         mostrarModalLogout = false
-                        // navController.navigate("login")
+                        navController.navigate("login") {
+                            popUpTo("ListaTarefas") { inclusive = true }
+                        }
                     }) {
                         Text("Sim", color = Color(0xFF2E7D32))
                     }
