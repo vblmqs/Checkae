@@ -1,6 +1,7 @@
 package com.example.taskapp.ui.taskform
 
 import android.app.DatePickerDialog
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +18,10 @@ import com.example.taskapp.components.CampoData
 import com.example.taskapp.components.CampoFormulario
 import com.example.taskapp.components.BotoesFormulario
 import com.example.taskapp.components.Header
+import com.example.taskapp.model.Priority
+import com.example.taskapp.data.model.Status
+import com.example.taskapp.components.CampoCombobox
+import com.example.taskapp.model.Task
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,8 +31,8 @@ fun TaskFormScreen(navController: NavHostController) {
 
     var titulo by remember { mutableStateOf("") }
     var descricao by remember { mutableStateOf("") }
-    var prioridade by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("") }
+    var prioridade by remember { mutableStateOf<Priority?>(null) }
+    var status by remember { mutableStateOf<Status?>(null) }
 
     val calendar = Calendar.getInstance()
     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -68,8 +73,21 @@ fun TaskFormScreen(navController: NavHostController) {
 
             CampoFormulario(label = "Título", value = titulo, onValueChange = { titulo = it })
             CampoFormulario(label = "Descrição", value = descricao, onValueChange = { descricao = it })
-            CampoFormulario(label = "Prioridade", value = prioridade, onValueChange = { prioridade = it })
-            CampoFormulario(label = "Status", value = status, onValueChange = { status = it })
+            CampoCombobox(
+                label = "Prioridade",
+                options = Priority.values().toList(),
+                selectedOption = prioridade,
+                onOptionSelected = { prioridade = it },
+                optionToDisplayedString = { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } }
+            )
+
+            CampoCombobox(
+                label = "Status",
+                options = Status.values().toList(),
+                selectedOption = status,
+                onOptionSelected = { status = it },
+                optionToDisplayedString = { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } }
+            )
             CampoData(
                 label = "Prazo",
                 value = dateFormat.format(Date(prazo)),
@@ -79,8 +97,29 @@ fun TaskFormScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.weight(1f))
 
             BotoesFormulario(
-                onDelete = { /* excluir tarefa */ },
-                onConfirm = { /* confirmar tarefa */ }
+                onDelete = null,
+                onConfirm = {
+                    val novaTarefa = Task(
+                        titulo = titulo,
+                        descricao = descricao.ifBlank { null },
+                        prioridade = prioridade ?: Priority.MEDIA,
+                        status = status ?: Status.INICIADA,
+                        prazoManual = prazo
+                    )
+
+                    val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+
+                    db.collection("tarefas")
+                        .add(novaTarefa)
+                        .addOnSuccessListener {
+                            Toast.makeText(context, "Tarefa salva com sucesso!", Toast.LENGTH_SHORT).show()
+                            navController.popBackStack()
+                        }
+                        .addOnFailureListener { e ->
+                            e.printStackTrace()
+                            Toast.makeText(context, "Erro ao salvar tarefa!", Toast.LENGTH_SHORT).show()
+                        }
+                }
             )
         }
     }
