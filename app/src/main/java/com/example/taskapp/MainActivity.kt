@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.taskapp.ui.TaskApp
 import androidx.compose.runtime.collectAsState
-import com.example.taskapp.ui.theme.TaskappTheme
+import com.example.taskapp.ui.theme.TaskAppTheme
 import com.example.taskapp.ui.theme.ThemeViewModel
 
 class MainActivity : ComponentActivity() {
@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val isDarkTheme = themeViewModel.isDarkTheme.collectAsState().value
 
-            TaskappTheme(darkTheme = isDarkTheme) {
+            TaskAppTheme(darkTheme = isDarkTheme) {
                 TaskApp(themeViewModel)
             }
         }
