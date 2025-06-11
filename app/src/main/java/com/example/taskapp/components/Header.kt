@@ -40,7 +40,8 @@ fun Header(
                 Icon(
                     imageVector = Icons.Default.ChevronLeft,
                     contentDescription = "Voltar",
-                    tint = MaterialTheme.colorScheme.onBackground
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(28.dp)
                 )
             }
 
@@ -71,7 +72,7 @@ fun Header(
             modifier = Modifier.align(Alignment.Center),
             style = MaterialTheme.typography.titleMedium.copy(
                 color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 16.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
                 lineHeight = 22.4.sp,
                 letterSpacing = (-0.32).sp

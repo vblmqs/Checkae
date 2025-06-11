@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.taskapp.data.model.Status
@@ -127,34 +128,38 @@ fun TaskListScreen(navController: NavHostController, themeViewModel: ThemeViewMo
 
 @Composable
 private fun HeaderSection(onThemeToggle: () -> Unit, onLogout: () -> Unit, isDarkTheme: Boolean) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+            .padding(vertical = 16.dp)
     ) {
-        Spacer(modifier = Modifier.weight(1f))
-
+        IconButton(
+            onClick = onThemeToggle,
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Icon(
+                imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                contentDescription = "Alternar Tema",
+                modifier = Modifier.size(28.dp)
+            )
+        }
         Text(
             text = "Minhas tarefas",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold
+            ),
+            modifier = Modifier.align(Alignment.Center)
         )
-
-        Row(
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.End
+        IconButton(
+            onClick = onLogout,
+            modifier = Modifier.align(Alignment.CenterEnd)
         ) {
-            IconButton(onClick = onThemeToggle) {
-                Icon(
-                    imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
-                    contentDescription = "Alternar Tema"
-                )
-            }
-            IconButton(onClick = onLogout) {
-                Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
-            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                contentDescription = "Logout",
+                modifier = Modifier.size(28.dp)
+            )
         }
     }
 }
