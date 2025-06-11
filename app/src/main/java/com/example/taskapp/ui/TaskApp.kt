@@ -35,40 +35,37 @@ fun TaskApp(themeViewModel: ThemeViewModel) {
         }
 
         composable("CadastrarTarefa") {
-            TaskFormScreen(navController = navController)
+            // Rota para criar tarefa nova, não passa ID.
+            TaskFormScreen(navController = navController, tarefaId = null)
         }
 
-        // NOVA SUBTAREFA
+        // ROTA PARA EDITAR TAREFA (AGORA CORRIGIDA)
         composable(
-            route = "subtaskForm/new/{tarefaId}",
+            route = "editarTarefa/{tarefaId}",
             arguments = listOf(navArgument("tarefaId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val tarefaId = backStackEntry.arguments?.getString("tarefaId") ?: ""
-            SubtaskFormScreen(
-                navController = navController,
-                tarefaId = tarefaId,
-                subtarefaId = null // null indica modo de criação
-            )
+            val tarefaId = backStackEntry.arguments?.getString("tarefaId")
+            // A parte crucial é passar o tarefaId para a tela
+            TaskFormScreen(navController = navController, tarefaId = tarefaId)
         }
 
-        // EDITAR SUBTAREFA
+
+        // ROTA DE SUBTAREFA UNIFICADA PARA CRIAÇÃO E EDIÇÃO
         composable(
-            route = "subtaskForm/edit/{tarefaId}/{subtarefaId}", // Nova rota com ambos os IDs
+            route = "subtaskForm/{tarefaId}/{subtarefaId}",
             arguments = listOf(
                 navArgument("tarefaId") { type = NavType.StringType },
-                navArgument("subtarefaId") { type = NavType.StringType } // subTarefaId também é String
+                navArgument("subtarefaId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val tarefaId = backStackEntry.arguments?.getString("tarefaId") ?: ""
-            val subtarefaId =
-                backStackEntry.arguments?.getString("subtarefaId") // Será não-nulo se a rota for chamada corretamente
+            val tarefaId = backStackEntry.arguments?.getString("tarefaId")
+            val subtarefaIdArgument = backStackEntry.arguments?.getString("subtarefaId")
 
-            // Verifica se subtarefaId realmente veio (para segurança, embora a rota o exija)
-            if (subtarefaId != null && tarefaId.isNotEmpty()) {
+            if (tarefaId != null && subtarefaIdArgument != null) {
                 SubtaskFormScreen(
                     navController = navController,
                     tarefaId = tarefaId,
-                    subtarefaId = subtarefaId // Passa o ID da subtarefa, indicando modo de edição
+                    subtarefaId = if (subtarefaIdArgument == "new") null else subtarefaIdArgument
                 )
             } else {
                 navController.popBackStack()
