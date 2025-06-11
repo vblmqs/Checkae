@@ -1,20 +1,21 @@
 package com.example.taskapp.ui.subtaskform
 
 import android.app.DatePickerDialog
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.* // Necessário para ExperimentalMaterial3Api se CampoCombobox usar TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.taskapp.components.BotoesFormulario
+import com.example.taskapp.components.CampoCombobox
 import com.example.taskapp.components.CampoData
 import com.example.taskapp.components.CampoFormulario
-import com.example.taskapp.components.BotoesFormulario // Assumindo que aceita onDelete opcional
 import com.example.taskapp.components.Header
-import com.example.taskapp.components.CampoCombobox // Nosso novo componente de combobox
 import com.example.taskapp.data.model.Status
 import com.example.taskapp.data.model.Subtask
 import java.text.SimpleDateFormat
@@ -30,7 +31,7 @@ private fun getDefaultPrazoForUI(): Long {
     }.timeInMillis
 }
 
-@OptIn(ExperimentalMaterial3Api::class) // Pode ser necessário para CampoCombobox
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubtaskFormScreen(
     navController: NavHostController,
@@ -43,7 +44,6 @@ fun SubtaskFormScreen(
 
     var titulo by remember { mutableStateOf("") }
     var descricao by remember { mutableStateOf("") }
-    // O status padrão é INICIADA. Se não estiver editando, o usuário não muda isso na UI.
     var statusSelecionado by remember { mutableStateOf(Status.INICIADA) }
     var prazo by remember { mutableStateOf(getDefaultPrazoForUI()) }
 
@@ -54,10 +54,10 @@ fun SubtaskFormScreen(
         if (isEditing) {
             subtaskViewModel.carregarSubtarefa(tarefaId, subtarefaId!!)
         } else {
-            // Modo de criação: reseta os campos
+            // Modo de criação: reseta os campos para garantir que não haja dados de edições anteriores
             titulo = ""
             descricao = ""
-            statusSelecionado = Status.INICIADA // Garante o padrão para novas subtarefas
+            statusSelecionado = Status.INICIADA
             prazo = getDefaultPrazoForUI()
         }
     }
@@ -69,7 +69,7 @@ fun SubtaskFormScreen(
                 titulo = loadedSubtask.titulo
                 descricao = loadedSubtask.descricao ?: ""
                 statusSelecionado = loadedSubtask.status
-                prazo = loadedSubtask.prazo // Prazo virá não-nulo do modelo atualizado
+                prazo = loadedSubtask.prazo
             }
         }
     }
@@ -81,6 +81,7 @@ fun SubtaskFormScreen(
             { _, year, month, day ->
                 val selectedCalendar = Calendar.getInstance().apply {
                     set(Calendar.YEAR, year); set(Calendar.MONTH, month); set(Calendar.DAY_OF_MONTH, day)
+                    // Zera o tempo para consistência
                     set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
                 }
                 prazo = selectedCalendar.timeInMillis
@@ -89,7 +90,7 @@ fun SubtaskFormScreen(
         ).show()
     }
 
-    Box(modifier = Modifier.fillMaxSize() .background(MaterialTheme.colorScheme.background)) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -99,19 +100,13 @@ fun SubtaskFormScreen(
             Header(
                 titulo = if (isEditing) "Editar Subtarefa" else "Cadastrar Subtarefa",
                 onVoltar = { navController.popBackStack() },
-                onClickIconeDireita = if (isEditing) {
-            {
-                // Coloque aqui a ação que deve acontecer quando o ícone de notificações for clicado
-                // APENAS NO MODO DE EDIÇÃO.
-                println("Ícone de notificações clicado no modo EDIÇÃO!")
-            }
-        } else null // Passa null quando não está editando (isEditing é false)
+                onClickIconeDireita = null // Defina uma ação se necessário
             )
 
             CampoFormulario(label = "Título", value = titulo, onValueChange = { titulo = it })
             CampoFormulario(label = "Descrição", value = descricao, onValueChange = { descricao = it })
 
-            // ---- CAMPO STATUS CONDICIONAL ----
+            // O campo Status só aparece no modo de edição
             if (isEditing) {
                 CampoCombobox(
                     label = "Status",
@@ -119,12 +114,11 @@ fun SubtaskFormScreen(
                     selectedOption = statusSelecionado,
                     onOptionSelected = { statusSelecionado = it },
                     optionToDisplayedString = { status ->
-                        // Ex: when (status) { Status.INICIADA -> "Iniciada"; ... }
-                        status.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                        status.name.lowercase().replaceFirstChar { it.titlecase(Locale.getDefault()) }
                     },
                     placeholder = "Selecione o Status"
                 )
-            } // Fim do if (isEditing) para o campo Status
+            }
 
             CampoData(
                 label = "Prazo",
@@ -136,22 +130,27 @@ fun SubtaskFormScreen(
 
             BotoesFormulario(
                 onConfirm = {
-                    if (!isEditing) { // Criar nova subtarefa
+                    if (titulo.isBlank()) {
+                        Toast.makeText(context, "O título da subtarefa é obrigatório.", Toast.LENGTH_SHORT).show()
+                        return@BotoesFormulario
+                    }
+
+                    if (!isEditing) {
                         val novaSubtarefa = Subtask(
+                            // O ID será gerado automaticamente pelo ViewModel
                             titulo = titulo,
                             descricao = if (descricao.isBlank()) null else descricao,
-                            status = Status.INICIADA, // Status padrão para novas subtarefas
+                            status = Status.INICIADA, // Novas subtarefas sempre iniciam com este status
                             prazo = prazo,
                             dataInicio = System.currentTimeMillis()
                         )
                         subtaskViewModel.cadastrarSubtarefa(tarefaId, novaSubtarefa)
                     } else { // Atualizar subtarefa existente
-                        val subtaskCarregada = subtaskState
-                        if (subtaskCarregada != null) {
+                        subtaskState?.let { subtaskCarregada ->
                             val subtaskAtualizada = subtaskCarregada.copy(
                                 titulo = titulo,
                                 descricao = if (descricao.isBlank()) null else descricao,
-                                status = statusSelecionado, // Status selecionado pelo usuário no modo edição
+                                status = statusSelecionado, // Usa o status que o usuário selecionou na UI
                                 prazo = prazo
                             )
                             subtaskViewModel.atualizarSubtarefa(tarefaId, subtaskAtualizada)
@@ -159,15 +158,13 @@ fun SubtaskFormScreen(
                     }
                     navController.popBackStack()
                 },
-                // ---- BOTÃO EXCLUIR CONDICIONAL ----
-                // Passa a ação de deletar SOMENTE se estiver editando
+                // O botão de excluir só aparece no modo de edição
                 onDelete = if (isEditing) {
                     {
-                        // O subtarefaId é não-nulo aqui por causa da verificação isEditing
                         subtaskViewModel.excluirSubtarefa(tarefaId, subtarefaId!!)
                         navController.popBackStack()
                     }
-                } else null // Se não estiver editando, onDelete é null (o botão não deve aparecer)
+                } else null
             )
         }
     }

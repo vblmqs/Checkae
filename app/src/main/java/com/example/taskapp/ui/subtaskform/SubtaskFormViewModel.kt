@@ -4,111 +4,88 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskapp.data.model.Status
 import com.example.taskapp.data.model.Subtask
+import com.example.taskapp.model.Task
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.*
 
 class SubtaskFormViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+    private val userId: String
+        get() = auth.currentUser?.uid ?: throw IllegalStateException("Usuário não autenticado")
 
-    // Estado observável da subtarefa atual
-    private val _subtask = MutableStateFlow<Subtask?>(null)
-    val subtask: StateFlow<Subtask?> = _subtask
+    private val _subtaskState = MutableStateFlow<Subtask?>(null)
+    val subtask: StateFlow<Subtask?> = _subtaskState
 
-    /**
-     * Carrega uma subtarefa específica de dentro de uma tarefa no Firestore.
-     * Usado para edição.
-     */
     fun carregarSubtarefa(tarefaId: String, subtarefaId: String) {
         viewModelScope.launch {
             try {
-                val documento = db.collection("tarefas")
-                    .document(tarefaId)
-                    .collection("subtarefas")
-                    .document(subtarefaId)
-                    .get()
-                    .await()
+                // Para carregar uma subtarefa, primeiro carregamos a tarefa pai
+                val taskDoc = db.collection("users").document(userId)
+                    .collection("tasks").document(tarefaId).get().await()
 
-                _subtask.value = documento.toObject(Subtask::class.java)
+                val task = taskDoc.toObject(Task::class.java)
+                _subtaskState.value = task?.subtarefas?.find { it.id == subtarefaId }
             } catch (e: Exception) {
                 e.printStackTrace()
-                _subtask.value = null
+                _subtaskState.value = null
             }
         }
     }
 
-    /**
-     * Cadastra uma nova subtarefa dentro de uma tarefa.
-     */
+    private fun getTaskRef(tarefaId: String) =
+        db.collection("users").document(userId).collection("tasks").document(tarefaId)
+
     fun cadastrarSubtarefa(tarefaId: String, subtarefa: Subtask) {
         viewModelScope.launch {
-            try {
-                val referencia = db.collection("tarefas")
-                    .document(tarefaId)
-                    .collection("subtarefas")
-                    .document()
-
-                val novaSubtarefa = subtarefa.copy(id = referencia.id)
-
-                referencia.set(novaSubtarefa).await()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            val taskRef = getTaskRef(tarefaId)
+            // Gera um ID único para a nova subtarefa
+            val novaSubtarefa = subtarefa.copy(id = UUID.randomUUID().toString())
+            // Adiciona a nova subtarefa ao array 'subtarefas' no Firestore
+            taskRef.update("subtarefas", FieldValue.arrayUnion(novaSubtarefa)).await()
         }
     }
 
-    /**
-     * Atualiza uma subtarefa existente.
-     */
-    fun atualizarSubtarefa(tarefaId: String, subtarefa: Subtask) {
+    fun atualizarSubtarefa(tarefaId: String, subtarefaAtualizada: Subtask) {
         viewModelScope.launch {
-            try {
-                db.collection("tarefas")
-                    .document(tarefaId)
-                    .collection("subtarefas")
-                    .document(subtarefa.id)
-                    .set(subtarefa)
-                    .await()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            val taskRef = getTaskRef(tarefaId)
+            db.runTransaction { transaction ->
+                val taskSnapshot = transaction.get(taskRef)
+                val task = taskSnapshot.toObject(Task::class.java)
+                if (task != null) {
+                    val subtarefasAntigas = task.subtarefas
+                    // Encontra e substitui a subtarefa na lista
+                    val subtarefasNovas = subtarefasAntigas.map {
+                        if (it.id == subtarefaAtualizada.id) subtarefaAtualizada else it
+                    }
+                    transaction.update(taskRef, "subtarefas", subtarefasNovas)
+                }
+            }.await()
         }
     }
 
-    /**
-     * Exclui uma subtarefa específica.
-     */
     fun excluirSubtarefa(tarefaId: String, subtarefaId: String) {
         viewModelScope.launch {
-            try {
-                db.collection("tarefas")
-                    .document(tarefaId)
-                    .collection("subtarefas")
-                    .document(subtarefaId)
-                    .delete()
-                    .await()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            val taskRef = getTaskRef(tarefaId)
+            db.runTransaction { transaction ->
+                val taskSnapshot = transaction.get(taskRef)
+                val task = taskSnapshot.toObject(Task::class.java)
+                if (task != null) {
+                    // Cria uma subtarefa "fantasma" apenas com o ID para o arrayRemove encontrar
+                    val subtaskParaRemover = task.subtarefas.find { it.id == subtarefaId }
+                    if(subtaskParaRemover != null) {
+                        // Usa FieldValue.arrayRemove para remover o objeto do array
+                        transaction.update(taskRef, "subtarefas", FieldValue.arrayRemove(subtaskParaRemover))
+                    }
+                }
+            }.await()
         }
     }
-
-    fun atualizarStatusSubtarefa(tarefaId: String, subtarefaId: String, novoStatus: Status) {
-        viewModelScope.launch {
-            try {
-                val ref = db.collection("tasks")
-                    .document(tarefaId)
-                    .collection("subtasks")
-                    .document(subtarefaId)
-
-                ref.update("status", novoStatus.name).await()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
 }
