@@ -39,7 +39,7 @@ fun CampoData(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium, // Usando FontWeight.Medium para consistência
                     lineHeight = 20.sp,
-                    color = MaterialTheme.colorScheme.onBackground // Use a cor do tema para melhor adaptabilidade
+                    color = Color.Black
                 ),
                 modifier = Modifier.weight(0.3f) // Ocupa 30% do espaço da Row
             )
