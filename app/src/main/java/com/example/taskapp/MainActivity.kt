@@ -1,5 +1,6 @@
 package com.example.taskapp
 
+import DeadlineNotificationWorker
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,7 +8,6 @@ import com.example.taskapp.ui.TaskApp
 import androidx.compose.runtime.collectAsState
 import androidx.work.*
 import java.util.concurrent.TimeUnit
-import com.example.taskapp.notifications.DeadlineNotificationWorker
 import com.example.taskapp.ui.theme.TaskAppTheme
 import com.example.taskapp.ui.theme.ThemeViewModel
 

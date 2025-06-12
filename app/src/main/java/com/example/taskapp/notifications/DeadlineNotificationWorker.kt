@@ -1,5 +1,3 @@
-package com.example.taskapp.notifications
-
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -9,6 +7,7 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.taskapp.R
+import com.example.taskapp.data.model.Status
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -45,7 +44,8 @@ class DeadlineNotificationWorker(
                     val deadline = Instant.ofEpochMilli(prazoManual)
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime()
-                    if (now.toLocalDate() == deadline.toLocalDate()) {
+                    val status = taskDoc.getString("status")
+                    if (status == Status.INICIADA.name && now.toLocalDate() == deadline.toLocalDate()) {
                         sendNotification(
                             id = "tarefa_$taskId",
                             titulo = "Tarefa com prazo hoje!",
@@ -59,12 +59,13 @@ class DeadlineNotificationWorker(
                 for (sub in subtarefas) {
                     val subTitulo = sub["titulo"] as? String ?: continue
                     val prazo = (sub["prazo"] as? Number)?.toLong() ?: continue
+                    val statusSub = sub["status"] as? String ?: continue
 
                     val subDeadline = Instant.ofEpochMilli(prazo)
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime()
 
-                    if (now.toLocalDate() == subDeadline.toLocalDate()) {
+                    if (statusSub == Status.INICIADA.name && now.toLocalDate() == subDeadline.toLocalDate()) {
                         sendNotification(
                             id = "sub_${taskId}_${subTitulo.hashCode()}",
                             titulo = "Subtarefa com prazo hoje!",
