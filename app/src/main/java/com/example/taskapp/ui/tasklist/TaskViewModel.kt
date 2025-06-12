@@ -15,7 +15,8 @@ data class TaskListUiState(
     val isLoading: Boolean = true,
     val searchQuery: String = "",
     val activePriorityFilter: Priority? = null,
-    val activeStatusFilter: Status? = null
+    val activeStatusFilter: Status? = null,
+    val ordenarPrazoMaisProximo: Boolean? = null
 )
 
 class TaskViewModel : ViewModel() {
@@ -26,6 +27,7 @@ class TaskViewModel : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     private val _priorityFilter = MutableStateFlow<Priority?>(null)
     private val _statusFilter = MutableStateFlow<Status?>(null)
+    private val _prazoOrder = MutableStateFlow<Boolean?>(null) // ← Novo: ordem por prazo
 
     // Estado da UI exposto para a tela (imutável)
     private val _uiState = MutableStateFlow(TaskListUiState(isLoading = true))
@@ -38,8 +40,9 @@ class TaskViewModel : ViewModel() {
                 repository.getTasks(),
                 _searchQuery,
                 _priorityFilter,
-                _statusFilter
-            ) { tasks, query, priority, status ->
+                _statusFilter,
+                _prazoOrder
+            ) { tasks, query, priority, status, ordenarPrazoMaisProximo ->
 
                 val filteredTasks = tasks
                     .filter { task -> // Filtro de busca no título
@@ -51,6 +54,13 @@ class TaskViewModel : ViewModel() {
                     .filter { task -> // Filtro de status
                         status == null || task.status == status
                     }
+                    .let { list ->
+                        when (ordenarPrazoMaisProximo) {
+                            true -> list.sortedBy { it.prazoCalculado }
+                            false -> list.sortedByDescending { it.prazoCalculado }
+                            else -> list
+                        }
+                    }
 
                 // Atualiza o estado da UI com os dados filtrados
                 TaskListUiState(
@@ -58,7 +68,8 @@ class TaskViewModel : ViewModel() {
                     isLoading = false,
                     searchQuery = query,
                     activePriorityFilter = priority,
-                    activeStatusFilter = status
+                    activeStatusFilter = status,
+                    ordenarPrazoMaisProximo = ordenarPrazoMaisProximo
                 )
             }.catch {
                 _uiState.value = _uiState.value.copy(isLoading = false)
@@ -80,6 +91,10 @@ class TaskViewModel : ViewModel() {
 
     fun onStatusFilterChanged(status: Status?) {
         _statusFilter.value = status
+    }
+
+    fun onPrazoOrderChanged(maisProximo: Boolean?) {
+        _prazoOrder.value = maisProximo
     }
 
     fun onSubtaskStatusChanged(taskId: String, subtaskId: String, newStatus: Status) {

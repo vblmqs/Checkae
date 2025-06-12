@@ -44,6 +44,7 @@ fun TaskListScreen(navController: NavHostController, themeViewModel: ThemeViewMo
 
     var tarefaExpandidaId by remember { mutableStateOf<String?>(null) }
     var mostrarModalLogout by remember { mutableStateOf(false) }
+    var filtroPrazoAberto by remember { mutableStateOf(false) }
 
     TaskAppTheme(darkTheme = isDarkTheme) {
         Scaffold { paddingValues ->
@@ -168,8 +169,9 @@ private fun HeaderSection(onThemeToggle: () -> Unit, onLogout: () -> Unit, isDar
 private fun SearchAndFilterSection(viewModel: TaskViewModel, uiState: TaskListUiState) {
     var filtroPrioridadeAberto by remember { mutableStateOf(false) }
     var filtroStatusAberto by remember { mutableStateOf(false) }
+    var filtroPrazoAberto by remember { mutableStateOf(false) }
 
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextField(
             value = uiState.searchQuery,
             onValueChange = { viewModel.onSearchQueryChanged(it) },
@@ -186,15 +188,47 @@ private fun SearchAndFilterSection(viewModel: TaskViewModel, uiState: TaskListUi
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Box(modifier = Modifier.weight(1f)) {
                 OutlinedButton(
+                    onClick = { filtroPrazoAberto = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text("Prazo", maxLines = 1)
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                }
+                DropdownMenu(
+                    expanded = filtroPrazoAberto,
+                    onDismissRequest = { filtroPrazoAberto = false }
+                ) {
+                    DropdownMenuItem(text = { Text("Sem ordenação") }, onClick = {
+                        viewModel.onPrazoOrderChanged(null)
+                        filtroPrazoAberto = false
+                    })
+                    DropdownMenuItem(text = { Text("Menos urgentes") }, onClick = {
+                        viewModel.onPrazoOrderChanged(true)
+                        filtroPrazoAberto = false
+                    })
+                    DropdownMenuItem(text = { Text("Mais urgentes") }, onClick = {
+                        viewModel.onPrazoOrderChanged(false)
+                        filtroPrazoAberto = false
+                    })
+                }
+            }
+            Box(modifier = Modifier.weight(1.5f)) {
+                OutlinedButton(
                     onClick = { filtroPrioridadeAberto = true },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = CircleShape
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text(uiState.activePriorityFilter?.name?.replaceFirstChar { it.titlecase() } ?: "Prioridade")
+                    Text(
+                        uiState.activePriorityFilter?.name?.replaceFirstChar { it.titlecase() } ?: "Prioridade",
+                        maxLines = 1
+                    )
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                 }
                 DropdownMenu(
@@ -206,7 +240,9 @@ private fun SearchAndFilterSection(viewModel: TaskViewModel, uiState: TaskListUi
                         filtroPrioridadeAberto = false
                     })
                     Priority.values().forEach { priority ->
-                        DropdownMenuItem(text = { Text(priority.name.replaceFirstChar { it.titlecase() }) }, onClick = {
+                        DropdownMenuItem(text = {
+                            Text(priority.name.replaceFirstChar { it.titlecase() })
+                        }, onClick = {
                             viewModel.onPriorityFilterChanged(priority)
                             filtroPrioridadeAberto = false
                         })
@@ -217,9 +253,13 @@ private fun SearchAndFilterSection(viewModel: TaskViewModel, uiState: TaskListUi
                 OutlinedButton(
                     onClick = { filtroStatusAberto = true },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = CircleShape
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                 ) {
-                    Text(uiState.activeStatusFilter?.name?.replaceFirstChar { it.titlecase() } ?: "Status")
+                    Text(
+                        uiState.activeStatusFilter?.name?.replaceFirstChar { it.titlecase() } ?: "Status",
+                        maxLines = 1
+                    )
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                 }
                 DropdownMenu(
@@ -231,7 +271,9 @@ private fun SearchAndFilterSection(viewModel: TaskViewModel, uiState: TaskListUi
                         filtroStatusAberto = false
                     })
                     Status.values().forEach { status ->
-                        DropdownMenuItem(text = { Text(status.name.replaceFirstChar { it.titlecase() }) }, onClick = {
+                        DropdownMenuItem(text = {
+                            Text(status.name.replaceFirstChar { it.titlecase() })
+                        }, onClick = {
                             viewModel.onStatusFilterChanged(status)
                             filtroStatusAberto = false
                         })
