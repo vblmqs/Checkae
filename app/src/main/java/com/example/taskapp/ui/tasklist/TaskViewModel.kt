@@ -101,7 +101,70 @@ class TaskViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 repository.updateSubtaskStatus(taskId, subtaskId, newStatus)
+
+                val updatedTaskAfterSubtaskSave = repository.getTaskById(taskId)
+
+                if (updatedTaskAfterSubtaskSave != null) {
+                    val allSubtasksCompleted = updatedTaskAfterSubtaskSave.todasSubtarefasConcluidas
+
+                    // Lógica para atualizar o status e dataFim da TASK PAI:
+                    if (allSubtasksCompleted && updatedTaskAfterSubtaskSave.status != Status.CONCLUIDA) {
+                        // Se todas as subtasks estão concluídas E a Task principal AINDA NÃO está CONCLUIDA
+                        val finalTaskDataFim = updatedTaskAfterSubtaskSave.subtarefas
+                            .filter { it.status == Status.CONCLUIDA && it.dataFim != null }
+                            .maxOfOrNull { it.dataFim!! } // Encontra a última dataFim entre as subtasks
+
+                        if (finalTaskDataFim != null) {
+                            val taskToMarkCompleted = updatedTaskAfterSubtaskSave.copy(
+                                status = Status.CONCLUIDA,
+                                dataFim = finalTaskDataFim // Define o dataFim da Task principal como o da última subtask
+                            )
+                            repository.updateTask(taskToMarkCompleted)
+                        }
+                    }
+                    // Se alguma subtask for reaberta
+                    else if (!allSubtasksCompleted && updatedTaskAfterSubtaskSave.status == Status.CONCLUIDA) {
+                        val taskToMarkIniciated = updatedTaskAfterSubtaskSave.copy(
+                            status = Status.INICIADA, // Ou outro status inicial apropriado
+                            dataFim = null // Limpa o dataFim da Task principal
+                        )
+                        repository.updateTask(taskToMarkIniciated) // Salva a Task principal atualizada
+                    }
+                }
             } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+        }
+    }
+
+    fun onTaskStatusChanged(taskId: String, newStatus: Status) {
+        viewModelScope.launch {
+            try {
+                // Busque a Task atual para ter o estado anterior (dataFim, status)
+                val currentTask = repository.getTaskById(taskId)
+
+                if (currentTask != null) {
+                    var updatedTask = currentTask
+
+                    // Lógica para definir dataFim da Task principal
+                    if (newStatus == Status.CONCLUIDA && currentTask.status != Status.CONCLUIDA) {
+                        updatedTask = currentTask.copy(
+                            status = newStatus,
+                            dataFim = System.currentTimeMillis()
+                        )
+                    } else if (newStatus != Status.CONCLUIDA && currentTask.status == Status.CONCLUIDA) {
+                        updatedTask = currentTask.copy(
+                            status = newStatus,
+                            dataFim = null
+                        )
+                    } else {
+                        updatedTask = currentTask.copy(status = newStatus)
+                    }
+                    repository.updateTask(updatedTask) // Salva a Task principal atualizada
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

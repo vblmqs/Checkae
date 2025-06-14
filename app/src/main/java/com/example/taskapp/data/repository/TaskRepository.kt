@@ -53,13 +53,28 @@ class TaskRepository {
                 val task = transaction.get(taskRef).toObject<Task>()
                 if (task != null) {
                     val updatedSubtasks = task.subtarefas.map { subtask ->
-                        if (subtask.id == subtaskId) subtask.copy(status = newStatus) else subtask
+                        if (subtask.id == subtaskId) {
+                            var subtaskToUpdate = subtask.copy(status = newStatus) // Copia a subtarefa com o novo status
+
+                            // Lógica para definir dataFim
+                            if (newStatus == Status.CONCLUIDA && subtaskToUpdate.dataFim == null) {
+                                subtaskToUpdate = subtaskToUpdate.copy(dataFim = System.currentTimeMillis())
+                            }
+                            else if (newStatus != Status.CONCLUIDA && subtaskToUpdate.dataFim != null) {
+                                subtaskToUpdate = subtaskToUpdate.copy(dataFim = null)
+                            }
+                            // Se nenhuma das condições acima for atendida, dataFim permanece como está.
+                            subtaskToUpdate
+                        } else {
+                            subtask
+                        }
                     }
                     transaction.update(taskRef, "subtarefas", updatedSubtasks)
                 }
             }.await()
         } catch (e: Exception) {
             Log.e(TAG, "Erro em updateSubtaskStatus para taskId: $taskId", e)
+            throw e // Rethrow para propagar a exceção
         }
     }
 

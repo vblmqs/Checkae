@@ -62,7 +62,7 @@ data class Subtask(
                 if (minutos == 1L) "$minutos minuto" else "$minutos minutos"
             }
             millis > 0 -> "Menos de 1 minuto"
-            else -> "Inválida" // Deveria ser pego pelo diff >= 0 no getter
+            else -> "Inválida"
         }
     }
 }

@@ -38,6 +38,7 @@ fun TaskFormScreen(
     var status by remember { mutableStateOf(Status.INICIADA) }
     var prazo by remember { mutableStateOf(System.currentTimeMillis()) }
 
+
     LaunchedEffect(key1 = tarefaId) {
         if (isEditing) {
             viewModel.carregarTarefa(tarefaId!!)
@@ -96,7 +97,31 @@ fun TaskFormScreen(
             CampoFormulario(label = "Título", value = titulo, onValueChange = { titulo = it })
             CampoFormulario(label = "Descrição", value = descricao, onValueChange = { descricao = it })
             CampoCombobox(label = "Prioridade", options = Priority.values().toList(), selectedOption = prioridade, onOptionSelected = { prioridade = it }, optionToDisplayedString = { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } })
-            CampoCombobox(label = "Status", options = Status.values().toList(), selectedOption = status, onOptionSelected = { status = it }, optionToDisplayedString = { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } })
+
+            // O campo de status é editável. A lógica de dataFim é tratada no ViewModel ao salvar.
+            val canMarkAsCompleted = taskState?.todasSubtarefasConcluidas ?: true
+            val statusOptions = if (taskState?.subtarefas?.isNotEmpty() == true) {
+                // Se tem subtarefas, a opção "Concluída" só é habilitada se todas as subtasks estiverem concluídas.
+                Status.values().toList().filter { it != Status.CONCLUIDA || canMarkAsCompleted || status == Status.CONCLUIDA }
+            } else {
+                Status.values().toList() // Se não tem subtarefas, todas as opções de status estão disponíveis
+            }
+
+            CampoCombobox(
+                label = "Status",
+                options = statusOptions,
+                selectedOption = status,
+                onOptionSelected = { newStatus ->
+                    // Permite alterar o status apenas se for válido
+                    if (newStatus == Status.CONCLUIDA && taskState?.subtarefas?.isNotEmpty() == true && !canMarkAsCompleted) {
+                        Toast.makeText(context, "Conclua todas as subtarefas primeiro.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        status = newStatus
+                    }
+                },
+                optionToDisplayedString = { it.name.lowercase().replaceFirstChar { c -> c.uppercase() } }
+            )
+
             CampoData(label = "Prazo", value = dateFormat.format(Date(prazo)), onClick = { showDatePicker() })
 
             Spacer(modifier = Modifier.weight(1f))
@@ -109,8 +134,8 @@ fun TaskFormScreen(
                             titulo = titulo,
                             descricao = descricao.ifBlank { null },
                             prioridade = prioridade,
-                            status = status,
-                            prazoManual = prazo,
+                            status = status, // O status é o que o usuário selecionou
+                            prazoManual = prazo, // prazoManual é o que o usuário escolheu
                             subtarefas = if (isEditing) taskState?.subtarefas ?: emptyList() else emptyList()
                         )
                         viewModel.salvarOuAtualizarTarefa(taskParaSalvar)

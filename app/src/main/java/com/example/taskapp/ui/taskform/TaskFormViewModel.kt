@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.example.taskapp.data.model.Status
+import java.util.UUID
 
 sealed class FormResult {
     object Idle : FormResult()
@@ -32,16 +34,39 @@ class TaskFormViewModel : ViewModel() {
     }
 
     fun salvarOuAtualizarTarefa(task: Task) {
+
         viewModelScope.launch {
             try {
-                if (task.id.isNotBlank()) {
-                    repository.updateTask(task)
+                // Obtenha a tarefa atual (do Firestore) antes de qualquer modificação, se for uma atualização
+                val existingTask = if (task.id.isNotBlank()) {
+                    repository.getTaskById(task.id)
                 } else {
-                    repository.addTask(task)
+                    null // Se o ID estiver em branco, é uma nova tarefa
                 }
+
+                var taskToSave = task
+
+                // Lógica para definir dataFim baseada na mudança de status
+                if (taskToSave.status == Status.CONCLUIDA && existingTask?.status != Status.CONCLUIDA) {
+                    taskToSave = taskToSave.copy(dataFim = System.currentTimeMillis())
+                } else if (taskToSave.status != Status.CONCLUIDA && existingTask?.status == Status.CONCLUIDA) {
+                    // Se o status mudou de CONCLUIDA para outro (tarefa reaberta)
+                    taskToSave = taskToSave.copy(dataFim = null)
+                }
+
+                // Salvar ou atualizar a tarefa no repositório
+                if (taskToSave.id.isNotBlank()) {
+                    repository.updateTask(taskToSave)
+                } else {
+                    // Se for uma nova tarefa, gera um ID único antes de adicionar
+                    val newTaskWithId = taskToSave.copy(id = UUID.randomUUID().toString())
+                    repository.addTask(newTaskWithId)
+                }
+
+                // Atualizar o resultado do formulário
                 _formResult.value = FormResult.Success
             } catch (e: Exception) {
-                _formResult.value = FormResult.Error(e.message ?: "Erro desconhecido")
+                _formResult.value = FormResult.Error(e.message ?: "Erro desconhecido ao salvar/atualizar tarefa.")
             }
         }
     }

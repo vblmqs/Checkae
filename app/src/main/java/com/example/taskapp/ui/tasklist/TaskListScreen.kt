@@ -328,6 +328,12 @@ fun TaskCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = contentColor.copy(alpha = 0.7f)
                     )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = task.duracao,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = contentColor.copy(alpha = 0.7f))
                 }
             }
 

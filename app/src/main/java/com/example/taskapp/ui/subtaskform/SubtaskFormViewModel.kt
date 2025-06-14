@@ -61,9 +61,22 @@ class SubtaskFormViewModel : ViewModel() {
                 val task = taskSnapshot.toObject(Task::class.java)
                 if (task != null) {
                     val subtarefasAntigas = task.subtarefas
-                    // Encontra e substitui a subtarefa na lista
+
+                    val subtarefaAntiga = subtarefasAntigas.find { it.id == subtarefaAtualizada.id }
+
+                    var subtarefaParaSalvar = subtarefaAtualizada
+
+                    // Lógica para definir dataFim se a subtarefa for concluída
+                    if (subtarefaAtualizada.status == Status.CONCLUIDA && subtarefaParaSalvar.dataFim == null) {
+                        subtarefaParaSalvar = subtarefaParaSalvar.copy(dataFim = System.currentTimeMillis())
+                    }
+                    // Se a subtarefa for "reaberta"
+                    else if (subtarefaAntiga?.status == Status.CONCLUIDA && subtarefaAtualizada.status != Status.CONCLUIDA) {
+                        subtarefaParaSalvar = subtarefaParaSalvar.copy(dataFim = null)
+                    }
+
                     val subtarefasNovas = subtarefasAntigas.map {
-                        if (it.id == subtarefaAtualizada.id) subtarefaAtualizada else it
+                        if (it.id == subtarefaParaSalvar.id) subtarefaParaSalvar else it
                     }
                     transaction.update(taskRef, "subtarefas", subtarefasNovas)
                 }
