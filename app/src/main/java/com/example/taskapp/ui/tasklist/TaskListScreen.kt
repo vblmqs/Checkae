@@ -209,11 +209,11 @@ private fun SearchAndFilterSection(viewModel: TaskViewModel, uiState: TaskListUi
                         filtroPrazoAberto = false
                     })
                     DropdownMenuItem(text = { Text("Menos urgentes") }, onClick = {
-                        viewModel.onPrazoOrderChanged(true)
+                        viewModel.onPrazoOrderChanged(false)
                         filtroPrazoAberto = false
                     })
                     DropdownMenuItem(text = { Text("Mais urgentes") }, onClick = {
-                        viewModel.onPrazoOrderChanged(false)
+                        viewModel.onPrazoOrderChanged(true)
                         filtroPrazoAberto = false
                     })
                 }
