@@ -46,8 +46,12 @@ Você pode rodar o Checkaê de duas formas: no emulador do Android Studio ou dir
    ```bash
    git checkout main
    ```
+   
+4. Sincronize o projeto com os arquivos Gradle:
+   - Vá em File > Sync Project with Gradle Files
+   - Ou clique no botão de sincronização na barra superior do Android Studio
 
-4. Execute o app:
+5. Execute o app:
     - Via emulador: Utilize o AVD Manager do Android Studio e clique em Run app ou diretamente via atalho por Shift+F10
     - Via celular: Conecte um dispositivo Android com depuração USB ativada e clique em Run app ou diretamente via atalho por Shift+F10
 
