@@ -44,7 +44,7 @@ Você pode rodar o Checkaê de duas formas: no emulador do Android Studio ou dir
 3. Faça checkout da branch principal:
 
    ```bash
-   git checkout agrupar
+   git checkout main
    ```
 
 4. Execute o app:
