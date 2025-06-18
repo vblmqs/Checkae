@@ -23,13 +23,17 @@ fun CustomLabeledInput(
     isPassword: Boolean = false,
     onValueChange: (String) -> Unit
 ) {
+    val labelColor = MaterialTheme.colorScheme.onBackground // Adapta ao tema
+    val textColor = Color.Black // Sempre preto
+    val backgroundColor = Color(0xFFC1D5E4).copy(alpha = 0.66f)
+
     Column(horizontalAlignment = Alignment.Start) {
         Text(
             text = label,
             fontSize = 12.sp,
             lineHeight = 20.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.Black.copy(alpha = 0.68f),
+            color = labelColor,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
 
@@ -46,11 +50,13 @@ fun CustomLabeledInput(
             ),
             shape = RoundedCornerShape(10.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFC1D5E4).copy(alpha = 0.66f),
-                unfocusedContainerColor = Color(0xFFC1D5E4).copy(alpha = 0.66f),
+                focusedContainerColor = backgroundColor,
+                unfocusedContainerColor = backgroundColor,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
+                disabledIndicatorColor = Color.Transparent,
+                focusedTextColor = textColor,
+                unfocusedTextColor = textColor
             ),
             textStyle = TextStyle(fontSize = 14.sp)
         )
